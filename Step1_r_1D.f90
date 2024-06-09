@@ -11,10 +11,10 @@ Program cyclic_heating_Step1
     integer :: j, n
 
     ! Constants
-    real(8), parameter :: RMIN = 2E-03 , RMAX = 50E-03                 ! Size of domein [mm]
+    real(8), parameter :: RMIN = 2E-03 , RMAX = 50E-03                 ! Size of domein [m]
     real(8), parameter :: alpha_0 = 1.374E-7, lambda_0 = 0.50         ! ROW = 1050, CP = 3465, lambda = 0.50, (Thermophysical properties)
     real(8), parameter :: Ts = 37.0                                   ! Human core temperature
-    real(8), parameter :: q = 5                                       ! Heat flux
+    real(8), parameter :: q = 10                                       ! Heat flux
     real(8), allocatable, dimension(:) :: T
     real(8), allocatable, dimension(:) :: S, deltaT, a, b, c, d, r
     real(8) :: dr, dt, aa, courant_number
@@ -27,7 +27,7 @@ Program cyclic_heating_Step1
     ! Enter the spatial step size : "
     dr =  RMAX / (nr-1)
     ! Enter the time step size : "
-    dt =  1.0e-3
+    dt = 1e-3
 
     courant_number = alpha_0*dt/dr**2
     if (courant_number >= 0.1) then
@@ -63,21 +63,21 @@ Program cyclic_heating_Step1
         
         ! left side
         a(1) = 0
-        b(1) = -aa+aa*dr/r(1)
-        c(1) = -1+aa-aa*dr/r(1)
-        d(1) = aa*dr*q*(-2+dr/r(1))/lambda_0-S(2)
+        b(1) = -aa - aa*dr/r(1)
+        c(1) = -1 + aa + aa*dr/r(1)
+        d(1) = dr/lambda_0*q*dt * ( -aa - aa*dr/2/r(1) ) - S(2)
 
         ! light side
-        a(nr) = -1+aa+aa*dr/r(nr)
-        b(nr) = -aa-aa*dr/r(nr)
+        a(nr) = 3 + aa + aa*dr/r(nr)
+        b(nr) = -2*aa - aa*dr/2/r(nr)
         c(nr) = 0
-        d(nr) = -S(nr-1)
+        d(nr) = -3*S(nr-1)
 
 
         ! r direction i=(2:N-1) 
-        a(2:nr-1) = -aa/2 - aa/4*dr/r(2:nr-1)
+        a(2:nr-1) = -aa/2 + aa/4*dr/r(2:nr-1)
         b(2:nr-1) = 1 + aa
-        c(2:nr-1) = -aa/2 + aa/4*dr/r(2:nr-1)
+        c(2:nr-1) = -aa/2 - aa/4*dr/r(2:nr-1)
         d(2:nr-1) = S(2:nr-1)
 
 !**************End of Boundary conditions of r direction*****************
@@ -88,9 +88,9 @@ Program cyclic_heating_Step1
         ! Update solution
         T(:) = T(:) + deltaT(:)
         write(*,*) n
-        write(*,*) deltaT(:)
+!        write(*,*) deltaT(:)
 
-        If (1 .eq. 1) then    
+        If (n .eq. 1) then    
             write(filename, '(A, I11.11, A)') 'Temperature_', n, '.dat'
     
             open(unit=11, file=filename, status="replace", action="write")
