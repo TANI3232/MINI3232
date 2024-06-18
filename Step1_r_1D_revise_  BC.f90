@@ -1,3 +1,4 @@
+
 !      *************************************************
 !      *  Bio Heat Transfer - cyclic heating STEP1 -   *
 !      *                            1-D version        *
@@ -15,7 +16,7 @@ Program cyclic_heating_Step1
     real(8), parameter :: alpha_0 = 1.374E-7, lambda_0 = 0.50                             ! ROW = 1050, CP = 3465, lambda = 0.50, (Thermophysical properties)
     real(8), parameter :: Ts = 37.0                                                       ! Human core temperature                                      
     real(8), parameter :: Heatsource = 25
-    real(8), parameter :: probearea = 2*pi*2E-03*20
+    real(8), parameter :: probearea = 2*pi*2E-03*20e-3
     real(8), allocatable, dimension(:) :: T
     real(8), allocatable, dimension(:) :: S, deltaT, a, b, c, d, r
     real(8) :: dr, dt, aa, q, courant_number, dA
@@ -24,11 +25,11 @@ Program cyclic_heating_Step1
 
     ! Get user inputs
     ! Enter the number of grid points : "
-    integer :: nr = 51, nt = 500000000
+    integer :: nr = 501, nt = 600000
     ! Enter the spatial step size : "
     dr =  RMAX / (nr-1)
     ! Enter the time step size : "
-    dt =  1e-6
+    dt =  1e-3
 !    dA = RMIN/2/pi
 
     ! Heat flux
@@ -71,7 +72,7 @@ Program cyclic_heating_Step1
         a(1) = 0
         b(1) = -aa-aa*dr/r(1)
         c(1) = -1+aa+aa*dr/r(1)
-        d(1) = dr/lambda_0*q*dt*(-aa-aa*dr/2/r(1))-S(2) !(4*q/lambda_0*dr -3*T(1)+4*T(2)-T(3))*(-aa/2-aa*dr/4/r(1))-S(2)!
+        d(1) = (2*dr/lambda_0*q -3*T(1)+4*T(2)-T(3))*(-aa/2-aa*dr/4/r(1))-S(2)
 
         ! light side
         a(nr) = -1+aa-aa*dr/r(nr)
@@ -111,7 +112,7 @@ Program cyclic_heating_Step1
     write(filename, '(A, I11.11, A)') 'Temperature_', nt, '.dat'
     open(unit=11, file=filename, status="replace", action="write")
         Do j = 1, nr
-            write(11,*) T(j)
+            write(11,*) r(j)*1000, T(j)
         End do
    close(11)
 
