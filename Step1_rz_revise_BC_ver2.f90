@@ -35,7 +35,7 @@ Program cyclic_heating_Step1
     z1 = int(nz*0.4)
     z2 = int(nz*0.6)
     ! Heat flux
-    probearea = 2*pi*RMIN*200
+    probearea = 2*pi*RMIN
     q = Heatsource / probearea
 
 
